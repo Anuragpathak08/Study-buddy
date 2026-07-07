@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - StudyBuddy{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Profile Card -->
+            <div class="card bg-dark text-white border-0 shadow-lg">
+                <div class="card-body">
+                    <!-- Display Current Profile -->
+                    <div class="text-center mb-4">
+                        <h4>{{ user.username }}</h4>
+                        <img src="{{ user_profile.avatar.url }}" alt="Avatar" class="rounded-circle border border-warning mb-3"
+                            style="width: 100px; height: 100px; object-fit: cover;">
+                        <p><strong>Bio:</strong> {{ user_profile.bio|default:"No bio added yet." }}</p>
+                        <p><strong>Location:</strong> {{ user_profile.location|default:"Not specified." }}</p>
+                    </div>
+
+                    <!-- Edit Profile Form -->
+                    <h5 class="mb-3">Edit Profile</h5>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_avatar" class="form-label">Avatar</label>
+                            <input type="file" class="form-control bg-secondary text-white" id="id_avatar" name="avatar"
+                                accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_bio" class="form-label">Bio</label>
+                            <textarea class="form-control bg-secondary text-white" id="id_bio" name="bio" rows="3"
+                                placeholder="Tell us about yourself..." maxlength="255">{{ user_profile.bio }}</textarea>
+                            <small class="text-muted d-block text-end mt-1" id="bio-counter">255 characters remaining</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_location" class="form-label">Location</label>
+                            <input type="text" class="form-control bg-secondary text-white" id="id_location" name="location"
+                                value="{{ user_profile.location }}" placeholder="Enter your location">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success rounded-pill">
+                                <i class="fa-solid fa-save me-2"></i>Save Changes
+                            </button>
+                            <a href="{% url 'profile' %}" class="btn btn-outline-light rounded-pill">
+                                <i class="fa-solid fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character Counter for Bio Field
+    const bioInput = document.getElementById('id_bio');
+    const bioCounter = document.getElementById('bio-counter');
+
+    bioInput.addEventListener('input', function () {
+        const remaining = 255 - this.value.length;
+        bioCounter.textContent = `${remaining} characters remaining`;
+    });
+</script>
+{% endblock %}

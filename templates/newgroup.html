@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}New Group Chat - StudyBuddy{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="text-center mb-4">Create a New Group Chat</h2>
+
+            <!-- Group Creation Form -->
+            <form method="POST" action="{% url 'create_group' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="group_name" class="form-label">Group Name</label>
+                    <input type="text" class="form-control bg-dark text-white" id="group_name" name="group_name"
+                        placeholder="Enter a group name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Invite Users</label>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text bg-secondary text-white"><i class="fa-solid fa-search"></i></span>
+                        <input type="text" class="form-control bg-dark text-white" id="user-search"
+                            placeholder="Search users...">
+                    </div>
+                    <div id="user-list" class="list-group bg-dark p-3 rounded overflow-auto" style="max-height: 200px;">
+                        {% for user in users %}
+                        <label class="list-group-item bg-dark text-white border-0 d-flex align-items-center">
+                            <input class="form-check-input me-2" type="checkbox" name="selected_users" value="{{ user.id }}">
+                            <i class="fa-solid fa-user-circle me-2 text-warning" style="font-size: 1.5rem;"></i>
+                            <span class="username">{{ user.username }}</span>
+                        </label>
+                        {% empty %}
+                        <p class="text-muted text-center">No users available to invite.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 rounded-pill">
+                    <i class="fa-solid fa-users me-2"></i>Create Group
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add event listener for filtering users
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('user-search');
+        const userItems = document.querySelectorAll('#user-list .list-group-item');
+
+        searchInput.addEventListener('input', function () {
+            const query = searchInput.value.toLowerCase().trim(); // Trim and convert to lowercase
+
+            userItems.forEach(item => {
+                // Extract the username from the span with class "username"
+                const usernameSpan = item.querySelector('.username');
+                if (usernameSpan) {
+                    const username = usernameSpan.textContent.toLowerCase(); // Get the text content of the span
+                    if (username.includes(query)) {
+                        item.style.display = ''; // Show matching items
+                    } else {
+                        item.style.display = 'none'; // Hide non-matching items
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+:root {
+  --primary-color: #695CFE;
+  --background-color: #f1eeee;
+  --text-color: #202020;
+  --text-color-2: #f7f7f7;
+  --primary-color-light: #344ea4;
+  --button-color: #e74c3c;
+  --input-padding: 15px;
+  --input-margin: 10px;
+  --label-margin: 5px;
+}
+
+body.dark{
+  --primary-color: #222324;
+  --background-color: #f1eeee;
+  --text-color: #202020;
+  --primary-color-light: #64686c;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background-image: linear-gradient(to bottom, var(--background-color), var(--primary-color));
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Form container styles */
+.form_container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 60vw;
+  overflow-y: auto;
+  height: 80vh;
+  width: 100%;
+  background: var(--background-color);
+  padding: 25px;
+  border: 1px solid var(--text-color);
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.1);
+}
+
+/* Label styles */
+label {
+  display: block;
+  margin-top: var(--label-margin);
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+/* Input styles */
+input {
+  background: var(--background-color);
+  height: 40px;
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 0 var(--input-padding);
+  color: #333;
+  transition: all 0.2s ease;
+  border-bottom: 1.5px solid #aaaaaa;
+}
+
+input:focus {
+  border-color: var(--primary-color);
+}
+
+/* Input row styles */
+.input-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: var(--input-margin);
+}
+
+/* Input column styles */
+.input-col {
+  width: 40%;
+  margin: 0 var(--input-margin);
+}
+
+.input-col label {
+  margin-bottom: var(--label-margin);
+}
+
+.input-col input {
+  padding: 0 var(--input-padding);
+}
+
+/* Select styles */
+select {
+  background: var(--background-color);
+  height: 40px;
+  width: 100%;
+  border: none;
+  outline: none;
+  color: #333;
+  transition: all 0.2s ease;
+  border-bottom: 1.5px solid #aaaaaa;
+}
+
+select:focus {
+  border-color: var(--primary-color);
+}
+
+/* Option styles */
+option {
+  padding: var(--input-padding);
+  font-size: 16px;
+  color: #333;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    resize: vertical;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  
+textarea:focus {
+    border-color: #aaa;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  }
+/* Button styles */
+.button {
+  background: var(--primary-color);
+  color: #fff;
+  margin-top: 30px;
+  width: 200px;
+  padding: 10px 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--primary-color-light);
+}
+
+.button:active {
+  background: var(--button-color);
+}

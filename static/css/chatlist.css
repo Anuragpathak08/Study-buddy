@@ -1,0 +1,50 @@
+.chat_container {
+    background-color: var(--body-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content:center;
+  }
+  
+  .chat_list, .group_chat {
+    padding: 20px;
+    width: 40%;
+    border-radius: 10px;
+  }
+  
+  .chat_list h2, .group_chat h2 {
+    color: var(--text-color);
+    margin:10px;
+  }
+
+.chat a, .group a {
+    display: block;
+    width: 100%;
+    padding: 5px;
+    margin: 5px;
+    color: var(--text-color);
+    font-size:18px ;
+    border-radius: 0.5rem;
+    text-decoration: none;
+  }
+  
+  .chat a:hover, .group a:hover {
+    background: var(--primary-color);
+    color: var(--text-color-2);
+  }
+  
+  .chat:last-child, .group:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 768px) {
+    .chat_container {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .chat_list, .group_chat {
+      width: 90%; /* Adjust this value as needed */
+      margin-bottom: 20px; /* Add some space between the sections */
+    }
+  }

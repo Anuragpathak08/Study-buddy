@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Home - StudyBuddy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="text-center mt-5">
+        <h1 class="display-4 fw-bold">Welcome to StudyBuddy!</h1>
+        <p class="lead text-muted">Collaborate, learn, and grow together with real-time messaging and group chats.</p>
+        <div class="mt-4">
+            <a href="{% url 'new_chat' %}" class="btn btn-lg btn-primary me-2">
+                <i class="fa-solid fa-comment-medical"></i> Start Chat
+            </a>
+            <a href="{% url 'new_group' %}" class="btn btn-lg btn-success">
+                <i class="fa-solid fa-users"></i> Join Group
+            </a>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h3 class="mb-4"><i class="fa-solid fa-bolt text-primary"></i> Key Features</h3>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item bg-transparent">
+                    <i class="fa-solid fa-check text-success me-2"></i> Real-time messaging
+                </li>
+                <li class="list-group-item bg-transparent">
+                    <i class="fa-solid fa-check text-success me-2"></i> Group chats for collaboration
+                </li>
+                <li class="list-group-item bg-transparent">
+                    <i class="fa-solid fa-check text-success me-2"></i> Spam detection for safe conversations
+                </li>
+                <li class="list-group-item bg-transparent">
+                    <i class="fa-solid fa-check text-success me-2"></i> Customizable user profiles
+                </li>
+            </ul>
+        </div>
+
+        <!-- Get Started Section -->
+        <div class="col-md-6">
+            <h3 class="mb-4"><i class="fa-solid fa-rocket text-warning"></i> Get Started</h3>
+            <p>Create a new chat or join an existing group to start collaborating with others.</p>
+            <div class="d-grid gap-2">
+                <a href="{% url 'new_chat' %}" class="btn btn-outline-primary">
+                    <i class="fa-solid fa-plus"></i> Create New Chat
+                </a>
+                <a href="{% url 'new_group' %}" class="btn btn-outline-success">
+                    <i class="fa-solid fa-users"></i> Join a Group
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Callout -->
+    <div class="text-center mt-5">
+        <p class="text-muted">Ready to get started? <a href="{% url 'new_chat' %}" class="text-primary">Start chatting now!</a></p>
+    </div>
+</div>
+{% endblock %}

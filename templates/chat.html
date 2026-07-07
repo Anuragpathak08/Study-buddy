@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - StudyBuddy{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Chat Card -->
+            <div class="card bg-dark text-white border-0 shadow-lg">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Chat with {{ chat_user }}</h4>
+                    <button class="btn btn-sm btn-outline-light" onclick="location.reload();">
+                        <i class="fa-solid fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="card-body p-0" style="height: 400px; overflow-y: auto;" id="message-list-container">
+                    <!-- Message List -->
+                    <ul class="list-group list-group-flush" id="message-list">
+                        {% for message in messages %}
+                        <li class="list-group-item bg-transparent border-0 py-2 px-3">
+                            <div class="d-flex align-items-start">
+                                <!-- Avatar -->
+                                <i class="fa-solid fa-user-circle me-2 text-warning" style="font-size: 2rem;"></i>
+                                <div>
+                                    <!-- Sender Name -->
+                                    <strong class="text-primary">{{ message.sender.username }}</strong>
+                                    <!-- Timestamp -->
+                                    <small class="text-info ms-2">{{ message.created_at|timesince }} ago</small>
+                                    <!-- Message Text -->
+                                    {% if message.message_text %}
+                                    <p class="mb-0 text-light">{{ message.message_text }}</p>
+                                    {% endif %}
+                                    <!-- Media -->
+                                    {% if message.attached_file %}
+                                    <div>
+                                        <a href="{{ message.attached_file.url }}" target="_blank">
+                                            {% if message.attached_file.url|slice:"-3:" == "jpg" or message.attached_file.url|slice:"-3:" == "png" or message.attached_file.url|slice:"-3:" == "gif" %}
+                                            <!-- Display image preview -->
+                                            <img src="{{ message.attached_file.url }}" style="max-width: 200px; max-height: 200px;" alt="Media">
+                                            {% else %}
+                                            <!-- Display file icon for non-image files -->
+                                            <i class="fa-solid fa-file-lines fa-2x me-2"></i>
+                                            <span>{{ message.attached_file.name }}</span>
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item bg-transparent text-center text-muted py-4">
+                            <i class="fa-solid fa-comment-slash fa-2x mb-2"></i>
+                            <p>No messages yet. Start the conversation!</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-dark">
+                    <!-- Message Input -->
+                    <form id="send-message-form" class="input-group">
+                        <input type="text" class="form-control bg-secondary text-white" id="message-input"
+                            placeholder="Type your message here..." maxlength="500">
+                        <input type="file" class="form-control bg-secondary text-white" id="media-input" accept="image/*,video/*,audio/*,.pdf,.doc,.docx">
+                        <button type="submit" class="btn btn-primary d-flex align-items-center">
+                            <i class="fa-solid fa-paper-plane me-2"></i> Send
+                        </button>
+                    </form>
+                    <small class="text-muted mt-2 d-block text-end" id="char-count">500 characters remaining</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Spam Notification Modal -->
+<div class="modal fade" id="spamModal" tabindex="-1" aria-labelledby="spamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="spamModalLabel"><i class="fa-solid fa-exclamation-triangle me-2"></i> Spam Detected!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Message:</strong> <span id="spam-message"></span></p>
+                <p><strong>Explanation:</strong> <span id="spam-explanation"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character Counter
+    const messageInput = document.getElementById('message-input');
+    const charCount = document.getElementById('char-count');
+
+    messageInput.addEventListener('input', function() {
+        const remaining = 500 - this.value.length;
+        charCount.textContent = `${remaining} characters remaining`;
+    });
+
+    // Establish WebSocket connection
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/{{ chat.id }}/'
+    );
+
+    chatSocket.onopen = function() {
+        console.log('WebSocket connection established');
+    };
+
+    chatSocket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'chat_message') {
+            const messageList = document.getElementById('message-list');
+            const newMessage = document.createElement('li');
+            newMessage.className = 'list-group-item bg-transparent border-0 py-2 px-3';
+            let mediaHtml = '';
+
+            if (data.media_url) {
+                mediaHtml = `
+                    <div>
+                        <a href="${data.media_url}" target="_blank">
+                            ${isImage(data.media_url) 
+                                ? `<img src="${data.media_url}" style="max-width: 200px; max-height: 200px;" alt="Media">` 
+                                : `<i class="fa-solid fa-file-lines fa-2x me-2"></i><span>${getFileName(data.media_url)}</span>`}
+                        </a>
+                    </div>`;
+            }
+
+            newMessage.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="fa-solid fa-user-circle me-2 text-warning" style="font-size: 2rem;"></i>
+                    <div>
+                        <strong class="text-primary">${data.username}</strong>
+                        <small class="text-muted ms-2">${data.timestamp} ago</small>
+                        <p class="mb-0 text-light">${data.message || ''}</p>
+                        ${mediaHtml}
+                    </div>
+                </div>`;
+            messageList.appendChild(newMessage);
+
+            // Scroll to the bottom
+            const messageListContainer = document.getElementById('message-list-container');
+            messageListContainer.scrollTop = messageListContainer.scrollHeight;
+        } else if (data.type === 'spam_notification') {
+            document.getElementById('spam-message').innerText = data.message;
+            document.getElementById('spam-explanation').innerText = data.explanation;
+
+            const spamModal = new bootstrap.Modal(document.getElementById('spamModal'));
+            spamModal.show();
+        }
+    };
+
+    chatSocket.onclose = function(event) {
+        console.error('WebSocket closed unexpectedly:', event);
+    };
+
+    // Handle form submission
+    document.getElementById('send-message-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        const messageInput = document.getElementById('message-input');
+        const mediaInput = document.getElementById('media-input');
+        const message = messageInput.value.trim();
+        const mediaFile = mediaInput.files[0];
+    
+        if (!message && !mediaFile) {
+            alert('Please enter a message or upload a file.');
+            return;
+        }
+    
+        if (mediaFile) {
+            // Send metadata first (including MIME type)
+            const metadata = {
+                type: 'media_metadata',
+                mime_type: mediaFile.type,
+                chat_id: '{{ chat.id }}',
+                username: '{{ request.user.username }}'
+            };
+            chatSocket.send(JSON.stringify(metadata));
+    
+            // Send binary data next
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result;
+                chatSocket.send(arrayBuffer);
+            };
+            reader.readAsArrayBuffer(mediaFile);
+        } else {
+            // Send text message
+            chatSocket.send(JSON.stringify({
+                'type': 'chat_message',
+                'username': '{{ request.user.username }}',
+                'message': message,
+                'chat_id': '{{ chat.id }}',
+                'timestamp': new Date().toISOString()
+            }));
+        }
+    
+        // Clear inputs
+        messageInput.value = '';
+        mediaInput.value = '';
+    });
+
+    // Helper functions
+    function isImage(url) {
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        const extension = url.split('.').pop().toLowerCase();
+        return imageExtensions.includes(extension);
+    }
+
+    function getFileName(url) {
+        return url.split('/').pop();
+    }
+</script>
+{% endblock %}

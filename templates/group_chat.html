@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Group Chat - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Group Chat Card -->
+            <div class="card bg-dark text-white border-0 shadow-lg">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">Group Chat: {{ group.name }}</h4>
+                        <p class="mb-0 text-muted">
+                            Members: 
+                            {% for membership in group.memberships.all %}
+                                <span class="badge bg-secondary me-1">{{ membership.user.username }}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light" onclick="location.reload();">
+                        <i class="fa-solid fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="card-body p-0" style="height: 400px; overflow-y: auto;" id="message-list-container">
+                    <!-- Message List -->
+                    <ul class="list-group list-group-flush" id="message-list">
+                        {% for message in messages %}
+                        <li class="list-group-item bg-transparent border-0 py-2 px-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fa-solid fa-user-circle me-2 text-warning" style="font-size: 2rem;"></i>
+                                <div>
+                                    <strong class="text-primary">{{ message.sender.username }}</strong>
+                                    <small class="text-info ms-2">{{ message.created_at|timesince }} ago</small>
+                                    <p class="mb-0 text-light">{{ message.message_text }}</p>
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item bg-transparent text-center text-muted py-4">
+                            <i class="fa-solid fa-comment-slash fa-2x mb-2"></i>
+                            <p>No messages yet. Start the conversation!</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-dark">
+                    <!-- Message Input -->
+                    <form id="send-message-form" class="input-group">
+                        <input type="text" class="form-control bg-secondary text-white" id="message-input"
+                            placeholder="Type your message here..." maxlength="500" required>
+                        <button type="submit" class="btn btn-primary d-flex align-items-center">
+                            <i class="fa-solid fa-paper-plane me-2"></i> Send
+                        </button>
+                    </form>
+                    <small class="text-muted mt-2 d-block text-end" id="char-count">500 characters remaining</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Spam Notification Modal -->
+<div class="modal fade" id="spamModal" tabindex="-1" aria-labelledby="spamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="spamModalLabel"><i class="fa-solid fa-exclamation-triangle me-2"></i> Spam Detected!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Message:</strong> <span id="spam-message"></span></p>
+                <p><strong>Explanation:</strong> <span id="spam-explanation"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character Counter
+    const messageInput = document.getElementById('message-input');
+    const charCount = document.getElementById('char-count');
+
+    messageInput.addEventListener('input', function() {
+        const remaining = 500 - this.value.length;
+        charCount.textContent = `${remaining} characters remaining`;
+    });
+
+    // Establish WebSocket connection
+    const groupSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/group/{{ group.id }}/'
+    );
+
+    groupSocket.onopen = function() {
+        console.log('WebSocket connection established.');
+    };
+
+    groupSocket.onerror = function(event) {
+        console.error('WebSocket error:', event);
+    };
+
+    groupSocket.onclose = function(event) {
+        console.error('WebSocket closed:', event);
+    };
+
+    groupSocket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'group_message') {
+            // Append new message to the chat
+            const messageList = document.getElementById('message-list');
+            const newMessage = document.createElement('li');
+            newMessage.className = 'list-group-item bg-transparent border-0 py-2 px-3';
+            newMessage.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="fa-solid fa-user-circle me-2 text-warning" style="font-size: 2rem;"></i>
+                    <div>
+                        <strong class="text-primary">${data.username}</strong>
+                        <small class="text-muted ms-2">${data.timestamp} ago</small>
+                        <p class="mb-0 text-light">${data.message}</p>
+                    </div>
+                </div>`;
+            messageList.appendChild(newMessage);
+
+            // Scroll to the bottom
+            const messageListContainer = document.getElementById('message-list-container');
+            messageListContainer.scrollTop = messageListContainer.scrollHeight;
+
+            // Add fade-in animation
+            newMessage.classList.add('fade-in');
+        } else if (data.type === 'spam_notification') {
+            // Show spam notification modal
+            document.getElementById('spam-message').innerText = data.message;
+            document.getElementById('spam-explanation').innerText = data.explanation;
+
+            const spamModal = new bootstrap.Modal(document.getElementById('spamModal'));
+            spamModal.show();
+        }
+    };
+
+    // Handle form submission
+    document.getElementById('send-message-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const message = messageInput.value.trim();
+
+        if (message) {
+            groupSocket.send(JSON.stringify({
+                'type': 'group_message',
+                'username': '{{ request.user.username }}',
+                'message': message,
+                'timestamp': new Date().toISOString(),
+                'group_id': '{{ group.id }}'
+            }));
+            messageInput.value = '';
+            charCount.textContent = '500 characters remaining';
+        }
+    });
+</script>
+
+<style>
+    /* Fade-in Animation */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Alternating Message Backgrounds */
+    #message-list li:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .card-header h4 {
+            font-size: 1.25rem;
+        }
+        #message-list-container {
+            height: 300px;
+        }
+    }
+</style>
+{% endblock %}

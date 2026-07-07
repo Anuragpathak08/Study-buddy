@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Login / Signup - StudyBuddy{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Auth Card -->
+            <div class="card bg-dark text-white border-0 shadow-lg">
+                <div class="card-header bg-transparent border-0">
+                    <ul class="nav nav-tabs card-header-tabs justify-content-center" id="authTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
+                                type="button" role="tab" aria-controls="login" aria-selected="true">
+                                <i class="fa-solid fa-sign-in-alt me-2"></i>Login
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup"
+                                type="button" role="tab" aria-controls="signup" aria-selected="false">
+                                <i class="fa-solid fa-user-plus me-2"></i>Signup
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="authTabsContent">
+                        <!-- Login Form -->
+                        <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                            <h3 class="card-title text-center mb-4"><i class="fa-solid fa-sign-in-alt me-2"></i>Login</h3>
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="login-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control bg-secondary text-white" id="login-username"
+                                        name="username" placeholder="Enter your username" required>
+                                </div>
+                                <div class="mb-3 position-relative">
+                                    <label for="login-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control bg-secondary text-white" id="login-password"
+                                        name="password" placeholder="Enter your password" required>
+                                    <i class="fa-solid fa-eye-slash toggle-password position-absolute top-50 end-0 translate-middle-y me-3"
+                                        style="cursor: pointer;" onclick="togglePassword('login-password')"></i>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill">
+                                    <i class="fa-solid fa-sign-in-alt me-2"></i>Login
+                                </button>
+                            </form>
+                            {% if error_message %}
+                            <p class="text-danger mt-3 text-center">{{ error_message }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Signup Form -->
+                        <div class="tab-pane fade" id="signup" role="tabpanel" aria-labelledby="signup-tab">
+                            <h3 class="card-title text-center mb-4"><i class="fa-solid fa-user-plus me-2"></i>Signup</h3>
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="signup-username" class="form-label">Username</label>
+                                    <input type="text" class="form-control bg-secondary text-white" id="signup-username"
+                                        name="username" placeholder="Choose a username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="signup-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control bg-secondary text-white" id="signup-email"
+                                        name="email" placeholder="Enter your email" required>
+                                </div>
+                                <div class="mb-3 position-relative">
+                                    <label for="signup-password1" class="form-label">Password</label>
+                                    <input type="password" class="form-control bg-secondary text-white" id="signup-password1"
+                                        name="password1" placeholder="Create a password" required>
+                                    <i class="fa-solid fa-eye-slash toggle-password position-absolute top-50 end-0 translate-middle-y me-3"
+                                        style="cursor: pointer;" onclick="togglePassword('signup-password1')"></i>
+                                </div>
+                                <div class="mb-3 position-relative">
+                                    <label for="signup-password2" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control bg-secondary text-white" id="signup-password2"
+                                        name="password2" placeholder="Confirm your password" required>
+                                    <i class="fa-solid fa-eye-slash toggle-password position-absolute top-50 end-0 translate-middle-y me-3"
+                                        style="cursor: pointer;" onclick="togglePassword('signup-password2')"></i>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 rounded-pill">
+                                    <i class="fa-solid fa-user-plus me-2"></i>Signup
+                                </button>
+                            </form>
+                            {% if signup_error %}
+                            <p class="text-danger mt-3 text-center">{{ signup_error }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle password visibility
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = input.nextElementSibling;
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    }
+</script>
+{% endblock %}

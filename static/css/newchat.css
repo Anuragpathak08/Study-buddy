@@ -1,0 +1,40 @@
+.newchat-container {
+  background-color: var(--body-color);
+  color: var(--text-color);
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+.users_list_container{
+  width: 60%;
+}
+
+.newchat-container h2 {
+  color: var(--text-color);
+  margin:10px;
+}
+
+.newchat-container hr {
+  border-top: 1px solid var(--toggle-color); /* light gray horizontal rule */
+}
+
+.username {
+  margin-bottom: 10px;
+}
+
+.username a {
+  display: block;
+    width: 100%;
+    padding: 5px;
+    margin: 5px;
+    font-size:18px ;
+    border-radius: 0.5rem;
+
+}
+
+.username a:hover {
+  background-color: var(--primary-color); /* blue background on hover */
+  color: var(--text-color-2); /* light blue text on hover */
+}
