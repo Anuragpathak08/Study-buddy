@@ -15,9 +15,9 @@ from django.utils.timezone import now
 
 # Load models globally
 MODEL_FILES = {
-    'vectorizer': 'trained data/tfidf_vectorizer.joblib',
-    'model': 'trained data/spam_model.joblib',
-    'encoder': 'trained data/label_encoder.joblib'
+    'vectorizer': 'trained_data/tfidf_vectorizer.joblib',
+    'model': 'trained_data/spam_model.joblib',
+    'encoder': 'trained_data/label_encoder.joblib'
 }
 
 try:

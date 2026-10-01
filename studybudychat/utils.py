@@ -13,7 +13,7 @@ from groq import Groq
 #  Constants & Setup #
 # ------------------ #
 
-os.makedirs('trained data', exist_ok=True)
+os.makedirs('trained_data', exist_ok=True)
 
 MODEL_FILES = {
     'vectorizer': 'trained_data/tfidf_vectorizer.joblib',
