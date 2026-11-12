@@ -5,3 +5,5 @@ trained_data/*
 */__pycache__/*
 
 db.sqlite3
+
+Media/*
