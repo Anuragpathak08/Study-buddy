@@ -105,7 +105,7 @@ def explain_with_genai(text):
                 "content": prompt,
             }
         ],
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
     )
     return chat_completion.choices[0].message.content
 
